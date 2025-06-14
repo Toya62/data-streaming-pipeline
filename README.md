@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Vehicle Telematics Data Streaming Pipeline
 
 A real-time data processing pipeline for vehicle telematics data using Apache Kafka and Apache Flink.
@@ -145,4 +146,115 @@ The pipeline can be scaled in several ways:
    - Add support for multiple output formats
    - Implement real-time dashboards
    - Add data warehousing integration
+=======
+# Air Quality Data Streaming Pipeline
+
+A real-time data processing pipeline that collects, processes, and analyzes air quality data from the OpenAQ API using Apache Kafka and Apache Flink.
+
+## Overview
+
+This project demonstrates a streaming data pipeline that:
+- Collects real-time air quality data from OpenAQ API
+- Processes the data using Apache Flink
+- Applies filters and transformations
+- Stores the results in JSON format
+
+## Prerequisites
+
+- Python 3.8+
+- Apache Kafka
+- Apache Flink
+- Required Python packages (see requirements.txt)
+
+## Quick Start
+
+1. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+2. Start Kafka:
+```bash
+# Start Zookeeper
+bin/zookeeper-server-start.sh config/zookeeper.properties
+
+# Start Kafka
+bin/kafka-server-start.sh config/server.properties
+```
+
+3. Create Kafka topic:
+```bash
+bin/kafka-topics.sh --create --topic air_quality_telematics --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+```
+
+4. Start the data producer:
+```bash
+python src/producer.py
+```
+
+5. Run the Flink pipeline:
+```bash
+python src/main.py
+```
+
+## Project Structure
+
+```
+.
+├── config/
+│   └── pipeline.json    # Pipeline configuration
+├── src/
+│   ├── producer.py      # Data producer
+│   └── main.py         # Flink pipeline
+├── output/             # Processed data output
+└── requirements.txt    # Python dependencies
+```
+
+## Configuration
+
+The pipeline is configured using `config/pipeline.json`. Example:
+
+```json
+{
+  "input": {
+    "type": "kafka",
+    "bootstrap_servers": "localhost:9092",
+    "topic": "air_quality_telematics",
+    "group_id": "air_quality_consumer"
+  },
+  "filters": [
+    { "pm25": 35.4 },
+    { "pm1": 20 },
+    { "pm03": 1000 }
+  ],
+  "transformations": [
+    { "operation": "add_timestamp" },
+    { "operation": "calculate_average" },
+    { "operation": "categorize_air_quality" }
+  ],
+  "output": {
+    "path": "output/air_quality_data.json"
+  }
+}
+```
+
+## Features
+
+- Real-time air quality data collection
+- Automatic station discovery
+- Configurable filters and transformations
+- JSON output format
+- Error handling and retry logic
+
+## Development
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+MIT License
+>>>>>>> b51b364 (Add .gitignore, update README for air quality data pipeline, implement main processing and producer scripts, and add tests for pipeline functionality.)
 

@@ -1,0 +1,30 @@
+{
+    "input": {
+        "type": "kafka",
+        "bootstrap_servers": "localhost:9092",
+        "topic": "air_quality_telematics",
+        "group_id": "air_quality_consumer"
+    },
+    "filters": [
+        {
+            "pm25": 35.4,
+            "pm1": 20,
+            "pm03": 1000
+        }
+    ],
+    "transformations": [
+        {
+            "type": "add_timestamp"
+        },
+        {
+            "type": "calculate_average"
+        },
+        {
+            "type": "categorize_air_quality"
+        }
+    ],
+    "output": {
+        "type": "file",
+        "path": "output/kias_air_quality_data.json"
+    }
+}
