@@ -4,6 +4,10 @@ import requests
 from datetime import datetime
 from kafka import KafkaProducer
 import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 class AirQualityProducer:
     def __init__(self, kafka_bootstrap_servers=['localhost:9092']):
