@@ -1,0 +1,314 @@
+(base) toya@Mac data-streaming-pipeline % 
+(base) toya@Mac data-streaming-pipeline % ls -l logs/
+total 536
+-rw-r--r--@ 1 toya  staff  112048 Jun 17 10:25 flink.log
+-rw-r--r--@ 1 toya  staff   78380 Jun 17 10:25 producer.log
+(base) toya@Mac data-streaming-pipeline % head -n 20 logs/producer.log
+2025-06-17 10:21:16,693 - __main__ - INFO - Starting producer...
+2025-06-17 10:21:16,700 - kafka.conn - INFO - <BrokerConnection client_id=kafka-python-producer-1, node_id=bootstrap-0 host=localhost:9092 <connecting> [IPv6 ('::1', 9092, 0, 0)]>: connecting to localhost:9092 [('::1', 9092, 0, 0) IPv6]
+2025-06-17 10:21:16,714 - kafka.conn - INFO - <BrokerConnection client_id=kafka-python-producer-1, node_id=bootstrap-0 host=localhost:9092 <checking_api_versions_recv> [IPv6 ('::1', 9092, 0, 0)]>: Broker version identified as 2.6
+2025-06-17 10:21:16,714 - kafka.conn - INFO - <BrokerConnection client_id=kafka-python-producer-1, node_id=bootstrap-0 host=localhost:9092 <connected> [IPv6 ('::1', 9092, 0, 0)]>: Connection complete.
+2025-06-17 10:21:18,798 - kafka.conn - INFO - <BrokerConnection client_id=kafka-python-producer-1, node_id=1 host=localhost:9092 <connecting> [IPv6 ('::1', 9092, 0, 0)]>: connecting to localhost:9092 [('::1', 9092, 0, 0) IPv6]
+2025-06-17 10:21:18,799 - kafka.conn - INFO - <BrokerConnection client_id=kafka-python-producer-1, node_id=1 host=localhost:9092 <connected> [IPv6 ('::1', 9092, 0, 0)]>: Connection complete.
+2025-06-17 10:21:18,799 - kafka.conn - INFO - <BrokerConnection client_id=kafka-python-producer-1, node_id=bootstrap-0 host=localhost:9092 <connected> [IPv6 ('::1', 9092, 0, 0)]>: Closing connection. 
+Initialized Kafka producer
+Starting to produce air quality data to Kafka...
+Searching for locations with recent data...
+Selected location: Alto Hospicio (ID: 139)
+Country: Chile
+City: None
+Fetching location data for 139...
+Fetching latest measurement for sensor 215...
+Fetched data: {
+  "timestamp": "2025-06-17T10:21:17.748637",
+  "meta": {
+    "name": "openaq-api",
+    "website": "/",
+(base) toya@Mac data-streaming-pipeline % head -n 20 logs/flink.log
+2025-06-17 10:21:24,148 - __main__ - INFO - Starting Flink pipeline...
+2025-06-17 10:21:24,154 - kafka.conn - INFO - <BrokerConnection client_id=kafka-python-2.2.11, node_id=bootstrap-0 host=localhost:9092 <connecting> [IPv6 ('::1', 9092, 0, 0)]>: connecting to localhost:9092 [('::1', 9092, 0, 0) IPv6]
+2025-06-17 10:21:24,175 - kafka.conn - INFO - <BrokerConnection client_id=kafka-python-2.2.11, node_id=bootstrap-0 host=localhost:9092 <checking_api_versions_recv> [IPv6 ('::1', 9092, 0, 0)]>: Broker version identified as 2.6
+2025-06-17 10:21:24,176 - kafka.conn - INFO - <BrokerConnection client_id=kafka-python-2.2.11, node_id=bootstrap-0 host=localhost:9092 <connected> [IPv6 ('::1', 9092, 0, 0)]>: Connection complete.
+2025-06-17 10:21:24,176 - kafka.consumer.subscription_state - INFO - Updating subscribed topics to: ('air_quality_telematics',)
+2025-06-17 10:21:24,176 - flink_pipeline - INFO - Starting to process air quality data...
+2025-06-17 10:21:24,187 - kafka.conn - INFO - <BrokerConnection client_id=kafka-python-2.2.11, node_id=1 host=localhost:9092 <connecting> [IPv6 ('::1', 9092, 0, 0)]>: connecting to localhost:9092 [('::1', 9092, 0, 0) IPv6]
+2025-06-17 10:21:24,288 - kafka.conn - INFO - <BrokerConnection client_id=kafka-python-2.2.11, node_id=1 host=localhost:9092 <connected> [IPv6 ('::1', 9092, 0, 0)]>: Connection complete.
+2025-06-17 10:21:24,288 - kafka.conn - INFO - <BrokerConnection client_id=kafka-python-2.2.11, node_id=bootstrap-0 host=localhost:9092 <connected> [IPv6 ('::1', 9092, 0, 0)]>: Closing connection. 
+2025-06-17 10:21:24,402 - kafka.cluster - INFO - Coordinator for group/air-quality-group is BrokerMetadata(nodeId='coordinator-1', host='localhost', port=9092, rack=None)
+2025-06-17 10:21:24,402 - kafka.coordinator - INFO - Discovered coordinator coordinator-1 for group air-quality-group
+2025-06-17 10:21:24,402 - kafka.coordinator.heartbeat - INFO - Starting new heartbeat thread
+2025-06-17 10:21:24,402 - kafka.coordinator.consumer - INFO - Revoking previously assigned partitions set() for group air-quality-group
+2025-06-17 10:21:24,403 - kafka.coordinator - INFO - Failed to join group air-quality-group: NodeNotReadyError: coordinator-1
+2025-06-17 10:21:24,403 - kafka.conn - INFO - <BrokerConnection client_id=kafka-python-2.2.11, node_id=coordinator-1 host=localhost:9092 <connecting> [IPv6 ('::1', 9092, 0, 0)]>: connecting to localhost:9092 [('::1', 9092, 0, 0) IPv6]
+2025-06-17 10:21:24,508 - kafka.coordinator - INFO - Failed to join group air-quality-group: NodeNotReadyError: coordinator-1
+2025-06-17 10:21:24,508 - kafka.conn - INFO - <BrokerConnection client_id=kafka-python-2.2.11, node_id=coordinator-1 host=localhost:9092 <connected> [IPv6 ('::1', 9092, 0, 0)]>: Connection complete.
+2025-06-17 10:21:24,609 - kafka.coordinator - INFO - (Re-)joining group air-quality-group
+2025-06-17 10:21:24,635 - kafka.coordinator - INFO - Received member id kafka-python-2.2.11-69516fe3-9d21-4d08-9142-ad7d8b717fc1 for group air-quality-group; will retry join-group
+2025-06-17 10:21:24,635 - kafka.coordinator - INFO - Failed to join group air-quality-group: [Error 79] MemberIdRequiredError
+(base) toya@Mac data-streaming-pipeline % ls -l output/
+total 80
+-rw-r--r--@ 1 toya  staff  3102 Jun 17 10:21 air_quality_20250617_102127.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:24 air_quality_20250617_102456.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102503.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102510.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102518.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102524.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102531.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102538.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102545.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102553.json
+(base) toya@Mac data-streaming-pipeline % cat output/air_quality_20250617_102553.json
+{
+  "timestamp": "2025-06-17T10:25:50.157634",
+  "meta": {
+    "name": "openaq-api",
+    "website": "/",
+    "page": 1,
+    "limit": 100,
+    "found": 1
+  },
+  "location": {
+    "id": 72,
+    "name": "Curic\u00f3",
+    "locality": "Curic\u00f3",
+    "timezone": "America/Santiago",
+    "country": {
+      "id": 3,
+      "code": "CL",
+      "name": "Chile"
+    },
+    "owner": {
+      "id": 4,
+      "name": "Unknown Governmental Organization"
+    },
+    "provider": {
+      "id": 164,
+      "name": "Chile - SINCA"
+    },
+    "isMobile": false,
+    "isMonitor": true,
+    "instruments": [
+      {
+        "id": 2,
+        "name": "Government Monitor"
+      }
+    ],
+    "sensors": [
+      {
+        "id": 110,
+        "name": "pm10 \u00b5g/m\u00b3",
+        "parameter": {
+          "id": 1,
+          "name": "pm10",
+          "units": "\u00b5g/m\u00b3",
+          "displayName": "PM10"
+        }
+      },
+      {
+        "id": 3538,
+        "name": "pm25 \u00b5g/m\u00b3",
+        "parameter": {
+          "id": 2,
+          "name": "pm25",
+          "units": "\u00b5g/m\u00b3",
+          "displayName": "PM2.5"
+        }
+      }
+    ],
+    "coordinates": {
+      "latitude": -34.974925077541,
+      "longitude": -71.233967512329
+    },
+    "licenses": null,
+    "bounds": [
+      -71.233967512329,
+      -34.974925077541,
+      -71.233967512329,
+      -34.974925077541
+    ],
+    "distance": null,
+    "datetimeFirst": {
+      "utc": "2016-01-30T01:00:00Z",
+      "local": "2016-01-29T22:00:00-03:00"
+    },
+    "datetimeLast": {
+      "utc": "2025-06-17T06:00:00Z",
+      "local": "2025-06-17T02:00:00-04:00"
+    }
+  },
+  "measurements": {
+    "pm10": {
+      "value": 44.88,
+      "unit": "\u00b5g/m\u00b3",
+      "display_name": "PM10",
+      "last_updated": null
+    },
+    "pm25": {
+      "value": 16.2,
+      "unit": "\u00b5g/m\u00b3",
+      "display_name": "PM2.5",
+      "last_updated": null
+    }
+  },
+  "processed_at": "2025-06-17T10:25:53.051305",
+  "aqi": 59.622317596566525,
+  "aqi_category": "Moderate"
+}%                                                                                                          
+(base) toya@Mac data-streaming-pipeline % mkdir -p docs/screenshots
+<afka-topics --list --bootstrap-server localhost:9092
+__consumer_offsets
+air-quality-data
+air_quality_telematics
+(base) toya@Mac data-streaming-pipeline % tail -n 20 logs/producer.log
+      "latitude": 5.58389,
+      "longitude": -0.19968
+    },
+    "licenses": null,
+    "bounds": [
+      -0.19968,
+      5.58389,
+      -0.19968,
+      5.58389
+    ],
+    "distance": null,
+    "datetimeFirst": null,
+    "datetimeLast": null
+  },
+  "measurements": {}
+}
+Sent data for Location='NMA - Nima' (ID: 3): 
+Fetching location data for 3...
+Fetching latest measurement for sensor 6...
+Fetching latest measurement for sensor 5...
+(base) toya@Mac data-streaming-pipeline % tail -n 20 logs/flink.log
+      }
+    ],
+    "coordinates": {
+      "latitude": 5.58389,
+      "longitude": -0.19968
+    },
+    "licenses": null,
+    "bounds": [
+      -0.19968,
+      5.58389,
+      -0.19968,
+      5.58389
+    ],
+    "distance": null,
+    "datetimeFirst": null,
+    "datetimeLast": null
+  },
+  "measurements": {}
+}
+2025-06-17 10:28:27,268 - flink_pipeline - ERROR - Error in filter: 'NoneType' object has no attribute 'get'
+(base) toya@Mac data-streaming-pipeline % ls -l output/
+total 88
+-rw-r--r--@ 1 toya  staff  3102 Jun 17 10:21 air_quality_20250617_102127.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:24 air_quality_20250617_102456.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102503.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102510.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102518.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102524.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102531.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102538.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102545.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102553.json
+-rw-r--r--@ 1 toya  staff  2021 Jun 17 10:25 air_quality_20250617_102559.json
+(base) toya@Mac data-streaming-pipeline % cat output/air_quality_20250617_102559.json
+{
+  "timestamp": "2025-06-17T10:25:58.044713",
+  "meta": {
+    "name": "openaq-api",
+    "website": "/",
+    "page": 1,
+    "limit": 100,
+    "found": 1
+  },
+  "location": {
+    "id": 72,
+    "name": "Curic\u00f3",
+    "locality": "Curic\u00f3",
+    "timezone": "America/Santiago",
+    "country": {
+      "id": 3,
+      "code": "CL",
+      "name": "Chile"
+    },
+    "owner": {
+      "id": 4,
+      "name": "Unknown Governmental Organization"
+    },
+    "provider": {
+      "id": 164,
+      "name": "Chile - SINCA"
+    },
+    "isMobile": false,
+    "isMonitor": true,
+    "instruments": [
+      {
+        "id": 2,
+        "name": "Government Monitor"
+      }
+    ],
+    "sensors": [
+      {
+        "id": 110,
+        "name": "pm10 \u00b5g/m\u00b3",
+        "parameter": {
+          "id": 1,
+          "name": "pm10",
+          "units": "\u00b5g/m\u00b3",
+          "displayName": "PM10"
+        }
+      },
+      {
+        "id": 3538,
+        "name": "pm25 \u00b5g/m\u00b3",
+        "parameter": {
+          "id": 2,
+          "name": "pm25",
+          "units": "\u00b5g/m\u00b3",
+          "displayName": "PM2.5"
+        }
+      }
+    ],
+    "coordinates": {
+      "latitude": -34.974925077541,
+      "longitude": -71.233967512329
+    },
+    "licenses": null,
+    "bounds": [
+      -71.233967512329,
+      -34.974925077541,
+      -71.233967512329,
+      -34.974925077541
+    ],
+    "distance": null,
+    "datetimeFirst": {
+      "utc": "2016-01-30T01:00:00Z",
+      "local": "2016-01-29T22:00:00-03:00"
+    },
+    "datetimeLast": {
+      "utc": "2025-06-17T06:00:00Z",
+      "local": "2025-06-17T02:00:00-04:00"
+    }
+  },
+  "measurements": {
+    "pm10": {
+      "value": 44.88,
+      "unit": "\u00b5g/m\u00b3",
+      "display_name": "PM10",
+      "last_updated": null
+    },
+    "pm25": {
+      "value": 16.2,
+      "unit": "\u00b5g/m\u00b3",
+      "display_name": "PM2.5",
+      "last_updated": null
+    }
+  },
+  "processed_at": "2025-06-17T10:25:59.356008",
+  "aqi": 59.622317596566525,
+  "aqi_category": "Moderate"
+}%                                                                                                          
+(base) toya@Mac data-streaming-pipeline % 
