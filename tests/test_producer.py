@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import json
+import pytest
 from src.producer import AirQualityProducer
 
 class TestAirQualityProducer(unittest.TestCase):

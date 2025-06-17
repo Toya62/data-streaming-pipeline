@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 import json
 from datetime import datetime, timedelta
+import pytest
 from src.flink_pipeline import AirQualityFilter, AirQualityTransformer
 
 class TestAirQualityPipeline(unittest.TestCase):
