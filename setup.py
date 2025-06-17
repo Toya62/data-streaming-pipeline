@@ -12,5 +12,12 @@ setup(
         "pytest",
         "pytest-cov"
     ],
+    extras_require={
+        'dev': [
+            'flake8',
+            'pytest',
+            'pytest-cov'
+        ]
+    },
     python_requires=">=3.8",
 ) 
