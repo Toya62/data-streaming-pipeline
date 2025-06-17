@@ -51,35 +51,71 @@ class TestAirQualityProducer(unittest.TestCase):
 
     @patch('requests.get')
     def test_fetch_air_quality_data(self, mock_get):
+        # Mock location response
+        location_response = MagicMock()
+        location_response.json.return_value = {
+            'results': [{
+                'id': '80',
+                'name': 'Test Location',
+                'sensors': [
+                    {
+                        'id': '1',
+                        'parameter': {
+                            'name': 'pm25',
+                            'units': 'µg/m³',
+                            'displayName': 'PM2.5'
+                        }
+                    },
+                    {
+                        'id': '2',
+                        'parameter': {
+                            'name': 'pm10',
+                            'units': 'µg/m³',
+                            'displayName': 'PM10'
+                        }
+                    }
+                ]
+            }]
+        }
+        location_response.raise_for_status.return_value = None
+
         # Mock measurements response
         measurements_response = MagicMock()
         measurements_response.json.return_value = {
             'results': [
                 {
-                    'parameter': 'pm25',
                     'value': 25.5,
-                    'unit': 'µg/m³',
-                    'date': {'utc': '2024-03-15T12:00:00Z'}
-                },
-                {
-                    'parameter': 'pm10',
-                    'value': 35.5,
-                    'unit': 'µg/m³',
                     'date': {'utc': '2024-03-15T12:00:00Z'}
                 }
             ]
         }
         measurements_response.raise_for_status.return_value = None
-        mock_get.return_value = measurements_response
+
+        # Configure mock to return different responses for different URLs
+        def mock_get_side_effect(url, *args, **kwargs):
+            if 'locations' in url:
+                return location_response
+            elif 'sensors' in url:
+                return measurements_response
+            return MagicMock()
+
+        mock_get.side_effect = mock_get_side_effect
 
         # Test fetching air quality data
         self.producer.location_id = '80'
         result = self.producer.fetch_air_quality_data()
-        
+
+        # Verify the result
         self.assertIsNotNone(result)
         self.assertIn('measurements', result)
         self.assertIn('pm25', result['measurements'])
         self.assertIn('pm10', result['measurements'])
+        
+        # Verify measurement values
+        self.assertEqual(result['measurements']['pm25']['value'], 25.5)
+        self.assertEqual(result['measurements']['pm10']['value'], 25.5)
+        self.assertEqual(result['measurements']['pm25']['unit'], 'µg/m³')
+        self.assertEqual(result['measurements']['pm10']['unit'], 'µg/m³')
 
     @patch('kafka.KafkaProducer')
     def test_producer_initialization(self, mock_kafka):
