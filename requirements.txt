@@ -1,15 +1,6 @@
-<<<<<<< HEAD
-numpy==1.21.6
 kafka-python==2.0.2
+requests==2.31.0
 python-dotenv==1.0.0
-requests==2.31.0
-apache-flink==1.14.6
-python-obd==0.7.1 
-=======
-apache-flink==1.18.0
-kafka-python==2.0.2
-requests==2.31.0
 pytest==7.4.0
 pytest-cov==4.1.0
-flake8==6.1.0 
->>>>>>> b51b364 (Add .gitignore, update README for air quality data pipeline, implement main processing and producer scripts, and add tests for pipeline functionality.)
+flake8==6.1.0

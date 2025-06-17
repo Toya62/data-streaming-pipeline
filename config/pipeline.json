@@ -9,7 +9,7 @@
         {
             "pm25": 35.4,
             "pm1": 20,
-            "pm03": 1000
+            "um003": 1000
         }
     ],
     "transformations": [
@@ -25,6 +25,6 @@
     ],
     "output": {
         "type": "file",
-        "path": "output/kias_air_quality_data.json"
+        "path": "output/air_quality_data.json"
     }
 }

@@ -1,0 +1,18 @@
+FROM flink:latest
+
+# Install Python and pip
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Copy the Flink job
+COPY src/flink_pipeline.py /opt/flink/usrlib/
+
+# Set the entrypoint
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["python3", "/opt/flink/usrlib/flink_pipeline.py"] 

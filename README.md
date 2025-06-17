@@ -1,260 +1,91 @@
-<<<<<<< HEAD
-# Vehicle Telematics Data Streaming Pipeline
+# Air Quality Data Pipeline
 
-A real-time data processing pipeline for vehicle telematics data using Apache Kafka and Apache Flink.
-
-## Architecture Overview
-
-```
-[Vehicle Data Source] → [Kafka] → [Flink Processing] → [Output Files]
-```
-
-### Components:
-- **Data Source**: Simulated vehicle telematics data (can be replaced with real OBD-II data)
-- **Message Broker**: Apache Kafka for reliable message streaming
-- **Stream Processing**: Apache Flink for real-time data processing
-- **Storage**: JSON files for processed data
-
-## Pipeline Configuration
-
-The pipeline is configured using a JSON file (`config/pipeline.json`):
-
-```json
-{
-    "input": {
-        "type": "kafka",
-        "bootstrap_servers": "localhost:9092",
-        "topic": "vehicle_telematics",
-        "group_id": "vehicle_data_processor"
-    },
-    "filters": [
-        {
-            "field": "speed",
-            "operator": "greater_than",
-            "value": 0
-        },
-        {
-            "field": "engine_speed",
-            "operator": "greater_than",
-            "value": 500
-        }
-    ],
-    "transformations": [
-        {
-            "type": "add_timestamp",
-            "target_field": "processed_at"
-        },
-        {
-            "type": "categorize_value",
-            "source_field": "speed",
-            "target_field": "speed_category"
-        }
-    ],
-    "output": {
-        "type": "filesystem",
-        "path": "output/vehicle_data.json"
-    }
-}
-```
-
-## Prerequisites
-
-- Python 3.9+
-- Docker and Docker Compose
-- Java 11+ (for Flink)
-
-## Setup and Running
-
-1. **Start Kafka and Zookeeper**:
-   ```bash
-   docker-compose up -d
-   ```
-
-2. **Install Dependencies**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   ```
-
-3. **Start the Data Producer**:
-   ```bash
-   python src/producer.py
-   ```
-
-4. **Run the Flink Pipeline**:
-   ```bash
-   python src/main.py
-   ```
-
-## Design Decisions
-
-### Technology Choices:
-1. **Apache Kafka**:
-   - Reliable message delivery
-   - Scalable message broker
-   - Good integration with Flink
-
-2. **Apache Flink**:
-   - Powerful stream processing
-   - Exactly-once processing semantics
-   - Rich set of operators for transformations
-
-3. **JSON Configuration**:
-   - Easy to modify pipeline behavior
-   - Clear separation of configuration and code
-   - Supports dynamic pipeline changes
-
-### Architecture Decisions:
-1. **Simulated Data Source**:
-   - Easy to develop and test
-   - Can be replaced with real OBD-II data
-   - Generates realistic vehicle telematics
-
-2. **File-based Output**:
-   - Simple to implement and debug
-   - Can be easily changed to other sinks
-   - Good for demonstration purposes
-
-## Scaling Strategy
-
-The pipeline can be scaled in several ways:
-
-1. **Kafka Scaling**:
-   - Multiple partitions for parallel processing
-   - Multiple brokers for high availability
-   - Consumer groups for load balancing
-
-2. **Flink Scaling**:
-   - Parallel operators
-   - Task slots for concurrent processing
-   - Checkpointing for fault tolerance
-
-## Future Improvements
-
-1. **Data Source**:
-   - Add support for real OBD-II devices
-   - Implement multiple data source types
-   - Add data validation
-
-2. **Processing**:
-   - Add more complex transformations
-   - Implement windowed aggregations
-   - Add machine learning predictions
-
-3. **Output**:
-   - Add support for multiple output formats
-   - Implement real-time dashboards
-   - Add data warehousing integration
-=======
-# Air Quality Data Streaming Pipeline
-
-A real-time data processing pipeline that collects, processes, and analyzes air quality data from the OpenAQ API using Apache Kafka and Apache Flink.
+This project implements a data streaming pipeline for processing air quality data. It uses Kafka for message streaming and a custom Python processor to filter, transform, and output the data.
 
 ## Overview
 
-This project demonstrates a streaming data pipeline that:
-- Collects real-time air quality data from OpenAQ API
-- Processes the data using Apache Flink
-- Applies filters and transformations
-- Stores the results in JSON format
+The pipeline consists of two main components:
+- **Producer**: Fetches air quality data from the OpenAQ API and sends it to a Kafka topic.
+- **Consumer (Flink Pipeline)**: Consumes messages from Kafka, filters and transforms the data, and writes the results to JSON files.
 
 ## Prerequisites
 
-- Python 3.8+
-- Apache Kafka
-- Apache Flink
-- Required Python packages (see requirements.txt)
+- Python 3.6+
+- Docker and Docker Compose
+- Kafka (running in Docker)
+- OpenAQ API key
 
-## Quick Start
+## Setup
 
-1. Install dependencies:
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd data-streaming-pipeline
+   ```
+
+2. Create a `.env` file in the project root with your OpenAQ API key:
+   ```
+   OPENAQ_API_KEY=your_api_key_here
+   ```
+
+3. Start Kafka and Zookeeper using Docker Compose:
+   ```bash
+   docker compose up -d zookeeper kafka
+   ```
+
+4. Create the Kafka topic:
+   ```bash
+   docker exec data-streaming-pipeline-kafka-1 kafka-topics --create --if-not-exists --topic air_quality_telematics --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+   ```
+
+## Running the Pipeline
+
+### End-to-End Pipeline
+
+To run the entire pipeline (producer and consumer), execute:
 ```bash
-pip install -r requirements.txt
+python src/main.py --component all
 ```
 
-2. Start Kafka:
-```bash
-# Start Zookeeper
-bin/zookeeper-server-start.sh config/zookeeper.properties
+### Individual Components
 
-# Start Kafka
-bin/kafka-server-start.sh config/server.properties
-```
+- **Producer**:
+  ```bash
+  python src/main.py --component producer
+  ```
 
-3. Create Kafka topic:
-```bash
-bin/kafka-topics.sh --create --topic air_quality_telematics --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
-```
+- **Consumer (Flink Pipeline)**:
+  ```bash
+  python src/main.py --component flink
+  ```
 
-4. Start the data producer:
-```bash
-python src/producer.py
-```
+## Pipeline Definition
 
-5. Run the Flink pipeline:
-```bash
-python src/main.py
-```
+The pipeline is defined in `pipeline.json`. This file outlines the configuration for the producer and consumer components, including Kafka settings and data processing logic.
 
-## Project Structure
+### Modifying the Pipeline
 
-```
-.
-├── config/
-│   └── pipeline.json    # Pipeline configuration
-├── src/
-│   ├── producer.py      # Data producer
-│   └── main.py         # Flink pipeline
-├── output/             # Processed data output
-└── requirements.txt    # Python dependencies
-```
+To modify the pipeline:
+1. Edit `pipeline.json` to update configuration parameters.
+2. Adjust the producer and consumer code in `src/producer.py` and `src/flink_pipeline.py` as needed.
 
-## Configuration
+## Design Decisions
 
-The pipeline is configured using `config/pipeline.json`. Example:
+- **Kafka**: Chosen for its robust message streaming capabilities and scalability.
+- **Python**: Used for its simplicity and ease of integration with APIs and data processing libraries.
+- **Docker**: Ensures consistent environment setup and simplifies deployment.
 
-```json
-{
-  "input": {
-    "type": "kafka",
-    "bootstrap_servers": "localhost:9092",
-    "topic": "air_quality_telematics",
-    "group_id": "air_quality_consumer"
-  },
-  "filters": [
-    { "pm25": 35.4 },
-    { "pm1": 20 },
-    { "pm03": 1000 }
-  ],
-  "transformations": [
-    { "operation": "add_timestamp" },
-    { "operation": "calculate_average" },
-    { "operation": "categorize_air_quality" }
-  ],
-  "output": {
-    "path": "output/air_quality_data.json"
-  }
-}
-```
+## Cluster Setup and Scaling Strategy
 
-## Features
+- **Kafka**: Configured with a single broker for development. For production, increase the number of partitions and replication factor.
+- **Consumer Group**: The consumer is part of a consumer group, allowing for horizontal scaling by adding more consumer instances.
+- **Error Handling**: Implemented robust error handling and logging to ensure data integrity and traceability.
 
-- Real-time air quality data collection
-- Automatic station discovery
-- Configurable filters and transformations
-- JSON output format
-- Error handling and retry logic
+## Contributing
 
-## Development
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT License
->>>>>>> b51b364 (Add .gitignore, update README for air quality data pipeline, implement main processing and producer scripts, and add tests for pipeline functionality.)
+This project is licensed under the MIT License - see the LICENSE file for details.
 
