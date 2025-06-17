@@ -1,134 +1,118 @@
 # Data Pipeline Execution Report
 
-## 1. Pipeline Components Status
+## 1. Pipeline Overview
+- **Data Source:** OpenAQ Air Quality API
+- **Processing:** Kafka + Python
+- **Output:** JSON files with AQI calculations
 
-### Kafka Topics
-Active topics in the system:
-- `__consumer_offsets` (System topic)
-- `air-quality-data` (Raw data topic)
-- `air_quality_telematics` (Processed data topic)
+## 2. Pipeline Components
 
-### Producer Status
-- Successfully connected to Kafka broker
-- Fetching data from OpenAQ API
-- Sending data to `air_quality_telematics` topic
-- Processing rate: ~1 batch per second
+### Data Producer
+- Fetches air quality data from OpenAQ API
+- Produces to Kafka topic `air_quality_telematics`
+- Handles rate limiting and retries
+- Performance: ~2-3 seconds per location
 
-### Flink Pipeline Status
-- Successfully connected to Kafka
-- Consumer group: `air-quality-group`
-- Processing data from `air_quality_telematics` topic
-- Generating output files with AQI calculations
+### Kafka Message Broker
+- Topic: `air_quality_telematics`
+- Single partition, single replica
+- Stable message delivery, low latency
 
-## 2. Data Processing Evidence
+### Data Processing
+- **Filters:**
+  1. Time filter: Drops data older than 24 hours
+  2. Measurement filter: Requires both PM2.5 and PM10
+- **Transform:**
+  - Calculates Air Quality Index (AQI)
+  - Categorizes air quality levels
+- **Output:** JSON files with timestamps
 
-### Sample Producer Log Entry
-```
-2025-06-17 10:21:16,693 - __main__ - INFO - Starting producer
-2025-06-17 10:21:16,694 - __main__ - INFO - Connected to Kafka broker
-2025-06-17 10:21:16,695 - __main__ - INFO - Fetching data from OpenAQ API
-```
-
-### Sample Flink Pipeline Log Entry
-```
-2025-06-17 10:21:24,148 - __main__ - INFO - Starting Flink pipeline
-2025-06-17 10:21:24,149 - __main__ - INFO - Connected to Kafka
-2025-06-17 10:21:24,150 - __main__ - INFO - Consumer group: air-quality-group
-```
-
-### Sample Output File Structure
+## 3. Pipeline Configuration
 ```json
 {
-  "timestamp": "2025-06-17T10:25:58.044713",
-  "meta": {
-    "name": "Air Quality Data",
-    "license": "CC-BY",
-    "website": "https://openaq.org",
-    "page": 1,
-    "limit": 100,
-    "found": 100
-  },
-  "results": [
-    {
-      "location": "US Diplomatic Post: New Delhi",
-      "city": "New Delhi",
-      "country": "IN",
-      "coordinates": {
-        "latitude": 28.6139,
-        "longitude": 77.2090
-      },
-      "measurements": [
-        {
-          "parameter": "pm25",
-          "value": 12.5,
-          "unit": "µg/m³",
-          "aqi": 52,
-          "category": "Moderate"
-        },
-        {
-          "parameter": "pm10",
-          "value": 25.0,
-          "unit": "µg/m³",
-          "aqi": 25,
-          "category": "Good"
-        }
-      ]
+  "input": {
+    "type": "http",
+    "url": "https://api.openaq.org/v2",
+    "endpoint": "measurements",
+    "parameters": {
+      "location_id": "80",
+      "limit": 100
     }
-  ]
+  },
+  "filters": [
+    {
+      "field": "date.utc",
+      "op": ">",
+      "value": "now-24h"
+    },
+    {
+      "field": "measurements",
+      "op": "has_all",
+      "value": ["pm25", "pm10"]
+    }
+  ],
+  "transform": {
+    "operation": "calculate_aqi",
+    "fields": {
+      "pm25": "measurements.pm25.value",
+      "pm10": "measurements.pm10.value"
+    }
+  },
+  "output": {
+    "type": "file",
+    "format": "json",
+    "path": "./output/air_quality_{timestamp}.json"
+  }
 }
 ```
 
-## 3. Performance Metrics
+## 4. Current Status
+
+### What Works
+- ✅ Data ingestion from OpenAQ API
+- ✅ Kafka message production
+- ✅ Basic filtering and transformation
+- ✅ JSON file output
+- ✅ Error handling and retries
+
+### What Doesn't Work
+- ❌ CI/CD pipeline (Codecov integration failing)
+- ❌ Distributed processing (single node only)
+- ❌ Authentication for API calls
+
+## 5. Test Coverage
+- Current coverage: 24%
+- Low coverage files:
+  - src/flink_pipeline.py: 44%
+  - src/main.py: 0%
+  - src/producer.py: 15%
+
+## 6. Known Issues
+1. CI/CD pipeline failing with Codecov
+2. Kafka connection issues in tests
+3. Limited error recovery
+4. No data validation
+
+## 7. Next Steps
+1. Fix CI/CD pipeline
+2. Improve test coverage
+3. Add data validation
+4. Implement distributed processing
+
+## 8. Execution Evidence
+
+### Pipeline Startup
+[![Producer Initialization](docs/screenshots/Producer1.jpg)](docs/screenshots/Producer1.jpg)
+[![Producer Connection](docs/screenshots/Producer2.jpg)](docs/screenshots/Producer2.jpg)
+*Initial pipeline startup showing Kafka connection and producer initialization*
 
 ### Data Processing
-- Total data fetches: 164 records
-- Total output files generated: 58 files
-- Average file size: 2,735 bytes
-- Processing rate: ~1 location per second
+[![Flink Processing 1](docs/screenshots/Flink1.jpg)](docs/screenshots/Flink1.jpg)
+[![Flink Processing 2](docs/screenshots/Flink2.jpg)](docs/screenshots/Flink2.jpg)
+*Real-time data processing showing message flow and transformations*
 
-### Data Quality
-- Successfully processed locations: 100% (no errors in data processing)
-- Average file size: 2.7 KB
-- Output file generation rate: ~1 file per 2.8 fetches
-- Data completeness: All required fields present (location, measurements, AQI)
+### Output Generation
+[![Output Files](docs/screenshots/Output.jpg)](docs/screenshots/Output.jpg)
+*Output file generation with AQI calculations*
 
-### System Performance
-- Kafka connection established successfully
-- Producer initialization time: < 1 second
-- Data fetch latency: < 1 second per location
-- File generation interval: ~5 seconds
-
-## 4. Issues and Observations
-
-### Identified Issues
-1. Some locations return empty measurements
-2. Occasional API timeouts
-3. Network latency affecting data freshness
-
-### Error Handling
-- Invalid data is logged and skipped
-- Pipeline continues processing valid data
-- Automatic retry mechanism for API failures
-
-## 5. Recommendations
-
-### Immediate Improvements
-1. Implement better error handling for empty measurements
-2. Add retry mechanism for API timeouts
-3. Optimize network requests
-
-### Future Enhancements
-1. Add data validation layer
-2. Implement data quality metrics
-3. Add monitoring and alerting
-4. Optimize file storage strategy
-
-## 6. Conclusion
-
-The pipeline is functioning as designed, successfully:
-- Fetching air quality data from OpenAQ API
-- Processing and transforming the data
-- Calculating AQI values
-- Generating output files with complete information
-
-The system demonstrates good reliability and performance, with proper error handling and data processing capabilities. 
+Note: Screenshots are stored in the `docs/screenshots` directory. Each screenshot shows a different aspect of the pipeline's operation, from startup to data processing and error handling. Click on any image to view it in full size.
