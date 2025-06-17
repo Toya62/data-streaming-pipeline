@@ -60,7 +60,12 @@ class TestAirQualityPipeline(unittest.TestCase):
         self.assertIn("location", result)
         self.assertIn("measurements", result)
         self.assertIn("aqi", result)
-        self.assertIn("timestamp", result)
+        self.assertIn("processed_at", result)
+        self.assertIn("aqi_category", result)
+        
+        # Verify AQI calculation
+        self.assertGreater(result["aqi"], 0)
+        self.assertIsInstance(result["aqi_category"], str)
 
 if __name__ == '__main__':
     unittest.main() 

@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, ANY
 import json
 import pytest
 from src.producer import AirQualityProducer
@@ -45,8 +45,9 @@ class TestAirQualityProducer(unittest.TestCase):
         mock_get.return_value = mock_response
 
         # Test finding active location
-        result = self.producer.find_active_location()
+        result = self.producer.find_location()
         self.assertTrue(result)
+        self.assertIsNotNone(self.producer.location_id)
         self.assertEqual(self.producer.location_id, '80')
 
     @patch('requests.get')
@@ -117,13 +118,30 @@ class TestAirQualityProducer(unittest.TestCase):
         self.assertEqual(result['measurements']['pm25']['unit'], 'µg/m³')
         self.assertEqual(result['measurements']['pm10']['unit'], 'µg/m³')
 
-    @patch('kafka.KafkaProducer')
+    @patch('src.producer.KafkaProducer')
     def test_producer_initialization(self, mock_kafka):
+        # Create a mock instance
+        mock_instance = MagicMock()
+        mock_kafka.return_value = mock_instance
+        
         # Test producer initialization
-        mock_kafka.return_value = MagicMock()
         producer = AirQualityProducer(['localhost:9092'])
+        
+        # Verify the producer was created
         self.assertIsNotNone(producer)
-        mock_kafka.assert_called_once()
+        
+        # Verify KafkaProducer was called with correct arguments
+        mock_kafka.assert_called_once_with(
+            bootstrap_servers=['localhost:9092'],
+            value_serializer=ANY  # Using ANY since the serializer is a lambda
+        )
+        
+        # Verify the producer instance has the expected attributes
+        self.assertIsNotNone(producer.producer)
+        self.assertIsNotNone(producer.openaq_api_key)
+        self.assertIsNone(producer.location_id)
+        self.assertEqual(producer.location_switch_counter, 0)
+        self.assertEqual(producer.location_switch_interval, 10)
 
 if __name__ == '__main__':
     unittest.main() 
